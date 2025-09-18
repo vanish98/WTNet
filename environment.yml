@@ -1,0 +1,16 @@
+name: WTNet
+channels:
+  - pytorch
+  - pyg
+  - dglteam
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.8
+  - pytorch=1.10.1
+  - torchvision=0.11.2
+  - torchaudio=0.10.1
+  - cudatoolkit=11.3
+  - dgl-cuda11.3
+  - pytorch-scatter=2.0.9
+  - pyg=2.0.4=*cu*
