@@ -93,22 +93,11 @@ python main.py --gpus 0 -d YAGO --batch_size 6 --hidden_dims 64 64 64 64 --histo
 
 
 
-## Citation
-The improvement of the model is based on the TiPNN model, and the dataset is also sourced from it.
-paper:
-```bibtex
-@article{dong2024temporal,
-  title={Temporal Inductive Path Neural Network for Temporal Knowledge Graph Reasoning},
-  author={Dong, Hao and Wang, Pengyang and Xiao, Meng and Ning, Zhiyuan and Wang, Pengfei and Zhou, Yuanchun},
-  journal={Artificial Intelligence},
-  pages={104085},
-  year={2024},
-  publisher={Elsevier}
-}
+## Acknowledge
+
+The orign code and datasets are from:
 ```
-orign code and datasets:
-```
-https://github.com/hhdo/TiPNNhttps://github.com/hhdo/TiPNN
+https://github.com/hhdo/TiPNN
 ```
 
 
