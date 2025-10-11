@@ -149,7 +149,7 @@ def split_subgraph(history_list, num_nodes, num_rels, windows_size):
     history_graph_list = []
     history_list_len = len(history_list)
     # history_list length would < history_len
-    # 第一个窗口的长度可以小于windows_size， if hl=14 ,windows_size=5,windows hl is {4,5,5}
+    # first window size maybe lt windows_size， if hl=14 ,windows_size=5,windows hl is {4,5,5}
     num,first_length = divmod(history_list_len, windows_size)
     start = 0
     for i in range(num+(1 if first_length else 0)):
