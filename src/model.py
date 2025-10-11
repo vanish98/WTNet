@@ -194,7 +194,7 @@ class WTNet(nn.Module):
 
         index = h_index[:, 0].unsqueeze(-1).expand_as(query)
         batch_size = len(h_index)
-        # initialize all pairs states as zeros in memory 初始整个历史图的状态
+        # initialize all pairs states as zeros in memory
         initial_stat = torch.zeros(batch_size, data.num_nodes(), self.dims[0], device=h_index.device)
 
         # Temporal Path Initialization
