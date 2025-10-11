@@ -1,5 +1,5 @@
 # WTNet: Temporal Knowledge Graph Reasoning Network with Windowing Strategy and Transformer-based Fusion
- Authors: Jiabin Zhang, Min Wangb, Guoqiang Xie and Jianrong Peng
+ Authors: Jiabin Zhang, Min Wang, Guoqiang Xie and Jianrong Peng
 ## Description
 
 1. This repository contains the code for the WTNet model mentioned in the article. 
