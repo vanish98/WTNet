@@ -9,7 +9,7 @@ class GateFusion(nn.Module):
         self.last_state = torch.zeros(input_dim)
 
     def set_last_state(self, last_stat):
-        # 用于设置初始化状态
+        # setting initialization status
         self.last_state = last_stat
 
     def forward(self, feature):
