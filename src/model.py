@@ -48,7 +48,7 @@ class WTNet(nn.Module):
         elif fusion_way == "gate":
             self.fusion_layer = GateFusion(input_dim)
         self.layers = nn.ModuleList()
-        # 4层
+
         for i in range(len(self.dims) - 1):  # num of hidden layers
             self.layers.append(layers.TemporalPathAgg(self.dims[i], self.dims[i + 1], self.num_relation,
                                                       self.dims[0], layer_norm, activation, time_encoding,
