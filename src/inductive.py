@@ -8,7 +8,7 @@ sys.path.append("..")
 import utils
 import json
 from config import args
-from model import TiPNN
+from model import WTNet
 from datetime import datetime
 from torch.utils import data as torch_data
 from torch import distributed as dist
@@ -182,27 +182,23 @@ if __name__ == '__main__':
     windows_size = args.windows_size
     num_windows = (history_len - 1) // windows_size + 1
     # model create
-    model = TiPNN(
+    model = WTNet(
         args.input_dim,
         args.hidden_dims,
         num_nodes,
         num_rels,
         history_len,
         windows_size,
-        args.num_mlp_layers,
         args.num_heads,
         args.num_transformer_layers,
         args.num_transformer_hiddens,
         args.dropout,
         num_windows=num_windows,
-        message_func=args.message_func,
-        aggregate_func=args.aggregate_func,
         short_cut=args.short_cut,
         layer_norm=args.layer_norm,
         activation="relu",
         time_encoding=args.time_encoding,
         time_encoding_independent=args.time_encoding_independent,
-        values_way=args.values_way
     )
     device = utils.get_device(args)
     model = model.to(device)
