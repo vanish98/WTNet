@@ -71,9 +71,10 @@ class SinusoidalPositionalEncoding(nn.Module):
 
 
 class FeatureFusionTransformer(nn.Module):
-    def __init__(self,num_windows, feature_dim=64, num_heads=8, num_layers=4, num_hiddens=128, dropout=0.1,pe="learning"):
+    def __init__(self,num_windows, feature_dim=64, num_heads=8, num_layers=4, num_hiddens=128, dropout=0.1,pe="learning",temporal_bias=False):
         super(FeatureFusionTransformer, self).__init__()
         self.num_windows = num_windows
+        self.temporal_bias = temporal_bias
 
         encoder_layer = nn.TransformerEncoderLayer(d_model=feature_dim, nhead=num_heads,
                                                    dim_feedforward=num_hiddens, dropout=dropout, batch_first=True)
@@ -103,6 +104,21 @@ class FeatureFusionTransformer(nn.Module):
         # when valid and test model , the third dims values equal node number  ,is too large
         negative_nums = feature_shape[1]
         final_output = list()
+        #gain window num
+        window_nums = feature_shape[2]
+        device=feature.device
+        temporal_mask=None
+        if self.temporal_bias:
+            # 1. generate indices
+            indices = torch.arange(window_nums, device=device)
+            # 2. calculate relative distance |i - j|
+            diff = indices.unsqueeze(0) - indices.unsqueeze(1)
+
+            # 3. generate Bias Mask：
+            # -1.0 means that every other window, the Attention Score decreases by 1
+            temporal_mask = -1.0 * torch.abs(diff).float()
+
+
         # data too large ,split to valid
         for i in range((negative_nums - 1) // 65 + 1):
             max_idx = (i + 1) * 65
@@ -119,7 +135,10 @@ class FeatureFusionTransformer(nn.Module):
             position_embedding = self.position_embedding(positions_index)
 
             feature_new+= position_embedding
-            output = self.transformer_encoder(feature_new)
+            if self.temporal_bias:
+                output = self.transformer_encoder(feature_new, mask=temporal_mask)
+            else:
+                output = self.transformer_encoder(feature_new)
             #recovery origin shape [bs*num_negative + 1,num_windows ,dims]->[bs,num_negative + 1,num_windows,dims]
             output = output.reshape(spilt_shape[0], spilt_shape[1], spilt_shape[2], -1)
             final_output.append(output)

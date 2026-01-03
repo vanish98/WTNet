@@ -74,6 +74,8 @@ parser.add_argument("--parameter_id",type=str, default="0",
                     help="mlp layer number use compress node_nums before transformer  ")
 parser.add_argument("--continues", action='store_true', default=False,
                     help="whether continue training   ")
+parser.add_argument("--temporal_bias",action='store_true', default=False,
+                    help="whether use temporal bias before input transformer encoder")
 args, unparsed = parser.parse_known_args()
 if get_rank() == 0:
   print(args)  

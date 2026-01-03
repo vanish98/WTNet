@@ -82,6 +82,21 @@ def train_and_validate(args, model, train_list, valid_list, test_list, num_nodes
                                                   num_workers=args.n_worker)
             sampler.set_epoch(future_sample_id)
             for batch in future_loader:
+
+                # extract  entities of current batch
+                batch_h = batch[:, 0]
+                batch_t = batch[:, 2]
+                # head and tail entities concat and  unique
+                batch_entities = torch.cat([batch_h, batch_t]).unique().to(device)
+                # sampled and reduce density of temporal  graph
+                if args.subgraph_sampling!=0:
+                    history_graph_list = utils.get_query_aware_subgraphs(
+                        history_graph_list,
+                        batch_entities,
+                        device,
+                        k_hop=args.subgraph_sampling
+                    )
+
                 # sample negative triples for future graph, we will not sample the ground truth edges in the 'future_triple' when the strict is True
                 # negative_num：64 batch_future_all ：(h,r,t)
                 batch_future_all = utils.negative_sampling(future_triple, batch, args.negative_num, num_nodes, num_rels,
@@ -212,6 +227,17 @@ def test(model, test_list, num_rels, num_nodes, mode="train", model_name=None,ep
                                               num_workers=args.n_worker)
 
         for batch in future_loader:
+            batch_h = batch[:, 0]
+            batch_t = batch[:, 2]
+            batch_entities = torch.cat([batch_h, batch_t]).unique().to(device)
+            if args.subgraph_sampling != 0:
+                history_graph_list = utils.get_query_aware_subgraphs(
+                    history_graph_list,
+                    batch_entities,
+                    device,
+                    k_hop=args.subgraph_sampling
+                )
+
             t_batch, h_batch = utils.all_negative(num_nodes, batch)
             t_pred = model(history_graph_list, t_batch)
             h_pred = model(history_graph_list, h_batch)
@@ -282,7 +308,7 @@ if __name__ == '__main__':
     # bsize:16-neg:64-hislen:8-msg:distmult-aggr:pna-dim:64+[64, 64, 64, 64]|True|True|True|True
     model_name = (f"bsize={args.batch_size}-neg={args.negative_num}-hislen={args.history_len}"
                   f"-heads={args.num_heads}-tlayer={args.num_transformer_layers}-thidden={args.num_transformer_hiddens}"
-                  f"-dim={args.input_dim}+{args.hidden_dims}-ws={windows_size}"
+                  f"-dim={args.input_dim}+{args.hidden_dims}-ws={windows_size}-sample={args.subgraph_sampling}"
                   f"_{args.short_cut}_{args.layer_norm}_{args.time_encoding}_{args.time_encoding_independent}")
 
     model_state_file = model_name + "" + args.parameter_id

@@ -88,9 +88,19 @@ bash auto_run.sh
 To generate the evaluation results of a pre-trained model (if exist), simply add the `--test` flag in the commands above.
 
 ```
-python main.py --gpus 0 -d YAGO --batch_size 6 --hidden_dims 64 64 64 64 --history_len 10 --time_encoding_independent --test
+python main.py --gpus 0 -d YAGO --batch_size 6 --hidden_dims 64 64 64 64 --history_len 10 --time_encoding_independent --windows_size 5 --test
+```
+### Inductive setting
+
+The dataset of inductive setting is also located at `data/`. Note that YAGO1-YAGO2, YAGO5-YAGO6 correspond to the three different dataset pairs created with different entity set partition ratios. The statistics and other details can be found in the paper.
+
+Take YAGO1-YAGO2 as an example, to run the inductive prediction, one can train on the training set of YAGO1 and test on the test set of YAGO2, and vice versa. 
+
+```
+python inductive.py --gpus 0 -d YAGO2 --batch_size 6--hidden_dims 64 64 64 64 --history_len 10 --windows_size 5 --time_encoding_independent --pretrain_name YAGO1
 ```
 
+Note that one should ensure the pre-trained model is relocated to the model folder of target dataset.
 
 
 ## Acknowledge
