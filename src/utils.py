@@ -348,7 +348,7 @@ def split_subgraph(history_list, num_nodes, num_rels, windows_size):
     history_graph_list = []
     history_list_len = len(history_list)
     # history_list length would < history_len
-    # 第一个窗口的长度可以小于windows_size， if hl=14 ,windows_size=5,windows hl is {4,5,5}
+    # The first window's length can be less than windows_size; if hl=14, windows_size=5, windows hl is {4,5,5}
     num, first_length = divmod(history_list_len, windows_size)
     start = 0
     for i in range(num + (1 if first_length else 0)):
@@ -361,50 +361,50 @@ def split_subgraph(history_list, num_nodes, num_rels, windows_size):
 
 def get_query_aware_subgraphs(history_graph_list, batch_entities, device, k_hop=1):
     """
-    根据当前查询的实体，对历史窗口图进行过滤，只保留与查询实体相关的边。
+    Filter the historical window graph based on current query entities, keeping only edges related to query entities.
 
     Args:
-        history_graph_list: List[Tensor], 每个元素是一个 (Num_Edges, 3) 或 (3, Num_Edges) 的张量
-        batch_entities: Tensor, 当前batch涉及的所有实体 ID (unique)
-        k_hop: int, 采样的跳数。通常 1-hop 足够降噪，2-hop 信息更全但密度更大。
+        history_graph_list: List[Tensor], each element is a (Num_Edges, 3) or (3, Num_Edges) tensor
+        batch_entities: Tensor, all entity IDs (unique) involved in the current batch
+        k_hop: int, sampling hops. Usually 1-hop is sufficient for denoising, 2-hop contains more information but with higher density.
     """
     sampled_history = []
 
-    # 转换为集合以便快速查找 (如果使用 torch.isin 则不需要 set)
+    # Convert to set for fast lookup (if using torch.isin, set is not needed)
     # current_nodes = batch_entities
 
     for graph in history_graph_list:
-        # 假设 graph 的 shape 是 [N, 3] (h, r, t) 或 [3, N]。
-        # 这里为了通用性，假设是 [N, 3]，即每行是一个三元组。
-        # 如果你的 graph 是稀疏矩阵或 geometric data，需要相应调整索引。
+        # Assume graph's shape is [N, 3] (h, r, t) or [3, N].
+        # For generality, assume it's [N, 3], meaning each row is a triplet.
+        # If your graph is a sparse matrix or geometric data, adjust indexing accordingly.
 
-        # 确保 graph 在正确的设备上
+        # Ensure graph is on the correct device
         if not isinstance(graph, torch.Tensor):
             graph = torch.from_numpy(graph)
         graph = graph.to(device)
 
         # --- 1-Hop Sampling ---
-        # 找出 Head 或 Tail 在 current_nodes 中的边
-        # graph[:, 0] 是 h, graph[:, 2] 是 t
+        # Find edges where Head or Tail is in current_nodes
+        # graph[:, 0] is h, graph[:, 2] is t
 
         # mask_h = torch.isin(graph[:, 0], batch_entities) # torch >= 1.10
         # mask_t = torch.isin(graph[:, 2], batch_entities)
 
-        # 为了兼容低版本 pytorch 或更快的速度，可以使用 bucketization 或简单的 mask
-        # 这里使用简单的广播比较 (注意显存) 或者优化的 isin
+        # For compatibility with lower pytorch versions or faster speed, use bucketization or simple mask
+        # Here using simple broadcast comparison (mind memory) or optimized isin
         mask = torch.isin(graph[:, 0], batch_entities) | torch.isin(graph[:, 2], batch_entities)
 
-        # 筛选出相关的边
+        # Filter out relevant edges
         sampled_edges = graph[mask]
 
-        # --- (可选) 2-Hop Sampling ---
-        # 如果需要更丰富的信息，可以将新发现的邻居加入节点集，再采一次
+        # --- (Optional) 2-Hop Sampling ---
+        # If more information is needed, add newly discovered neighbors to node set and sample again
         if k_hop > 1:
-            # 提取 1-hop 中新出现的邻居节点
+            # Extract newly appeared neighbor nodes in 1-hop
             new_nodes = torch.cat([sampled_edges[:, 0], sampled_edges[:, 2]]).unique()
-            # 合并节点集
+            # Merge node sets
             all_nodes = torch.cat([batch_entities, new_nodes]).unique()
-            # 再次过滤 (基于扩充后的节点集)
+            # Filter again (based on expanded node set)
             mask_2 = torch.isin(graph[:, 0], all_nodes) | torch.isin(graph[:, 2], all_nodes)
             sampled_edges = graph[mask_2]
 
