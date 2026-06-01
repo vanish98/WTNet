@@ -11,7 +11,9 @@
 3. This repository contains the following contents:
 ```
 /
-├── data/                   --> (The folder containing three used datasets)   
+├── data/                   --> (The folder containing used datasets)   
+|   ├── GDELT/              --> (The GDELT dataset.)
+|   ├── ICEWS18/            --> (The ICEWS18 dataset.)
 |   ├── WIKI/               --> (The WIKI dataset.)
 |   ├── YAGO/               --> (The YAGO dataset.)
 |   ├── YAGO1/               --> (Inductive setting V1: 50% subgraph)
@@ -30,6 +32,8 @@
 |   ├── lstm.py             --> (Lstm  module used for feature fusion during ablation experiments )
 |   ├── main.py             --> (The main file for training and testing)
 |   ├── model.py            --> (The WTNet's definition)
+|   ├── model_view.py       --> (WTNet with visualization hooks for path extraction)
+|   ├── pathview.py         --> (Reasoning path visualization & case collection)
 |   ├── transformer.py      --> (To fusion features component in the WTNet)
 |   ├── utils.py            --> (The utility functions)
 ├── .gitignore/             --> (Git ignore file)
@@ -62,7 +66,12 @@ conda env create -f requirements.txt
 copy and execute command from "[conda_install.sh](conda_install.sh)" in terminal
 
 ### DataSets
-YAGO and WIKI datasets : `data/YAGO` and `data/WIKI`.
+GDELT, ICEWS18, WIKI and YAGO datasets are located under `data/`:
+
+- `data/GDELT` — GDELT dataset
+- `data/ICEWS18` — ICEWS18 dataset
+- `data/WIKI` — WIKI dataset
+- `data/YAGO` — YAGO dataset
 
 ### Train models
 
@@ -107,6 +116,13 @@ python inductive.py --gpus 0 -d YAGO2 --batch_size 6--hidden_dims 64 64 64 64 --
 
 Note that one should ensure the pre-trained model is relocated to the model folder of target dataset.
 
+### PathView
+
+To extract and visualize reasoning paths from a pre-trained model:
+
+```
+python pathview.py --gpus 0 -d ICEWS18 --batch_size 6 --hidden_dims 64 64 64 64 64 --num_heads 8 --num_transformer_hiddens 128 --num_layers 4 --history_len 30 --windows_size 18 --parameter_id 1 --work_dir transformer_p3 --test 
+```
 
 ## Acknowledge
 
